@@ -54,7 +54,7 @@
     <div id="quiz-screen" class="hidden">
         <div class="header" style="margin-bottom: 10px;">
             <div class="step-badge">
-                <span>🏛️ 나주학생독립기념관</span> | <span>🇰🇷 문제 <span id="step-num">1</span>/20</span>
+                <span>🏛️ 나주역 기념관</span> | <span>🇰🇷 문제 <span id="step-num">1</span>/20</span>
             </div>
             <h1 id="user-info-display" style="font-size: 1.3rem;"></h1>
         </div>
@@ -96,8 +96,9 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
+    // 고학년 심화 20문항 (주요 역사 낱말 위주 정답)
     const quizData = [
-        { q: "옛 나주역 옆에 역사 현장을 기억하기 위해 개관한 시설은 [ <span class='blank'>?</span> ]이다.", a: ["나주학생독립기념관"] },
+        { q: "옛 나주역 옆에 역사 현장을 기억하기 위해 개관한 시설은 나주학생독립운동[ <span class='blank'>?</span> ]이다.", a: ["기념관"] },
         { q: "1895년 전국 항일의병의 단초가 된 고종의 명령은 [ <span class='blank'>?</span> ]이다.", a: ["단발령"] },
         { q: "1905년 일제가 대한제국의 외교권을 강제로 빼앗기 위해 체결한 조약은 [ <span class='blank'>?</span> ]이다.", a: ["을사조약", "을사늑약"] },
         { q: "1910년대 일제가 헌병 경찰을 앞세워 압제하던 통치 방식은 [ <span class='blank'>?</span> ]이다.", a: ["무단통치", "무단"] },
