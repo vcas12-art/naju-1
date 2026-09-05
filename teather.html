@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>교사용 탐방 제출 현황판</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Pretendard', -apple-system, sans-serif; }
+        body { background-color: #f4f6f9; padding: 30px; }
+        .container { max-width: 850px; margin: 0 auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        h1 { color: #2c3e50; margin-bottom: 8px; font-size: 1.8rem; }
+        p { color: #666; margin-bottom: 25px; font-size: 0.95rem; }
+        
+        .summary-box {
+            background-color: #e8f4fd;
+            border-left: 5px solid #2980b9;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            color: #2c3e50;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 14px; text-align: center; border-bottom: 1px solid #eee; }
+        th { background: #f8f9fa; color: #555; font-size: 0.95rem; }
+        
+        .badge-complete { 
+            background: #d4edda; 
+            color: #155724; 
+            padding: 6px 12px; 
+            border-radius: 20px; 
+            font-weight: bold; 
+            font-size: 0.85rem; 
+        }
+    </style>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+</head>
+<body>
+
+<div class="container">
+    <h1>👨‍🏫 제출 완료 학생 명단</h1>
+    <p>학생들이 20문제를 풀고 [선생님에게 보내기]를 누르면 실시간으로 기록됩니다.</p>
+
+    <div class="summary-box">
+        <span>현재 총 제출한 학생 수</span>
+        <span id="total-count" style="font-size:1.3rem; color:#2980b9;">0 명</span>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 15%;">번호</th>
+                <th style="width: 30%;">학생 이름</th>
+                <th style="width: 30%;">달성 상태</th>
+                <th style="width: 25%;">제출 시간</th>
+            </tr>
+        </thead>
+        <tbody id="student-list">
+            <tr>
+                <td colspan="4" style="color:#888; padding:30px 0;">제출된 기록을 불러오는 중입니다...</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<script>
+    // 전달받은 Firebase 설정 적용
+    const firebaseConfig = {
+        apiKey: "AIzaSyD8YLm0dP67l8m99StfCxriueyJEhlyBpk",
+        authDomain: "najurisua.firebaseapp.com",
+        databaseURL: "https://najurisua-default-rtdb.firebaseio.com",
+        projectId: "najurisua",
+        storageBucket: "najurisua.firebasestorage.app",
+        messagingSenderId: "19829249054",
+        appId: "1:19829249054:web:9bcb211068a9c9bb81ca0f",
+        measurementId: "G-2WMMS89R6X"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // 데이터 실시간 수신 및 표시
+    db.ref('submissions').on('value', (snapshot) => {
+        const data = snapshot.val();
+        const tbody = document.getElementById('student-list');
+        const countDisplay = document.getElementById('total-count');
+        tbody.innerHTML = "";
+
+        if (!data) {
+            tbody.innerHTML = `<tr><td colspan="4" style="color:#888; padding:30px 0;">아직 제출한 학생이 없습니다.</td></tr>`;
+            countDisplay.innerText = "0 명";
+            return;
+        }
+
+        let index = 1;
+        const keys = Object.keys(data);
+        countDisplay.innerText = `${keys.length} 명`;
+
+        keys.forEach(key => {
+            const student = data[key];
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${index++}</td>
+                <td><strong>${student.name}</strong></td>
+                <td><span class="badge-complete">${student.status}</span></td>
+                <td>${student.submittedAt}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    });
+</script>
+
+</body>
+</html>
