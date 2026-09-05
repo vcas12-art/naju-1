@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>나주학생독립운동 탐방 퀴즈</title>
+    <style>
+        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+        :root { 
+            --primary: #c0392b; 
+            --primary-dark: #962d22;
+            --secondary: #2c3e50; 
+            --bg: #f5f0eb; 
+            --card-bg: #ffffff;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Pretendard', sans-serif; }
+
+        body { 
+            background: var(--bg) url('https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=1200&q=80') center/cover fixed;
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            padding: 20px; 
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(44, 62, 80, 0.45);
+            z-index: 1;
+        }
+
+        .quiz-card { 
+            position: relative;
+            z-index: 2;
+            background: var(--card-bg); 
+            width: 100%; 
+            max-width: 580px; 
+            padding: 35px 30px; 
+            border-radius: 24px; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+            border: 3px solid #e0d5c1;
+            overflow: hidden;
+        }
+
+        .flag-banner {
+            height: 8px;
+            width: 100%;
+            background: linear-gradient(90deg, #cd2e3a 0%, #cd2e3a 50%, #0047a0 50%, #0047a0 100%);
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .header { text-align: center; margin-bottom: 20px; margin-top: 10px; }
+        .header h1 { font-size: 1.65rem; color: var(--secondary); font-weight: 800; letter-spacing: -0.5px; }
+        .header p { color: #7f8c8d; font-size: 0.95rem; margin-top: 6px; }
+
+        .flag-main-icon {
+            text-align: center;
+            margin: 20px 0 25px 0;
+        }
+        .flag-main-icon img {
+            width: 130px;
+            height: auto;
+            filter: drop-shadow(0 6px 12px rgba(0,0,0,0.15));
+        }
+
+        .input-group { display: flex; flex-direction: column; gap: 14px; margin-bottom: 20px; }
+        
+        input[type="text"] { 
+            padding: 16px; 
+            border: 2px solid #e2e8f0; 
+            border-radius: 12px; 
+            font-size: 1rem; 
+            outline: none; 
+            transition: 0.3s;
+            background-color: #fdfbf7;
+        }
+        input[type="text"]:focus { 
+            border-color: var(--primary); 
+            background-color: #fff;
+            box-shadow: 0 0 0 4px rgba(192, 57, 43, 0.15);
+        }
+
+        .btn-main { 
+            padding: 16px; 
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark)); 
+            color: white; 
+            border: none; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            font-weight: 700; 
+            font-size: 1.05rem; 
+            box-shadow: 0 6px 15px rgba(192, 57, 43, 0.3);
+            transition: all 0.2s ease;
+        }
+        .btn-main:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(192, 57, 43, 0.4); }
+
+        .step-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #fff6f6;
+            color: var(--primary);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            border: 1px solid #fecdcd;
+            margin-bottom: 12px;
+        }
+
+        .question-card-wrapper {
+            position: relative;
+            background: #fffdf9;
+            border: 2px solid #f0e6d2;
+            border-radius: 16px;
+            padding: 25px 20px;
+            margin-bottom: 20px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .question-box { 
+            font-size: 1.15rem; 
+            line-height: 1.65; 
+            color: #2d3748;
+            text-align: center;
+            font-weight: 600;
+        }
+        .blank { color: var(--primary); font-weight: 900; border-bottom: 3px solid var(--primary); padding: 0 6px; }
+
+        .progress-bar { height: 10px; background: #edf2f7; border-radius: 5px; margin-bottom: 20px; overflow: hidden; }
+        .progress { height: 100%; background: linear-gradient(90deg, #e74c3c, #f39c12); width: 0%; transition: 0.4s ease; }
+
+        .hidden { display: none; }
+        
+        .btn-send { 
+            background: linear-gradient(135deg, #27ae60, #1e8449); 
+            margin-top: 15px; 
+            width: 100%; 
+            font-size: 1.1rem; 
+            padding: 16px;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 6px 15px rgba(39, 174, 96, 0.3);
+        }
+        .btn-send:hover { transform: translateY(-2px); }
+    </style>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+</head>
+<body>
+
+<div class="quiz-card">
+    <div class="flag-banner"></div>
+
+    <!-- 1. 로그인 화면 -->
+    <div id="login-screen">
+        <div class="header">
+            <h1>나주학생독립운동 탐방</h1>
+            <p>역사의 현장을 직접 느껴보는 퀴즈 미션</p>
+        </div>
+
+        <!-- 첫 화면 태극기 일러스트 -->
+        <div class="flag-main-icon">
+            <img src="https://cdn-icons-png.flaticon.com/512/197/197582.png" alt="태극기">
+        </div>
+
+        <div class="input-group">
+            <input type="text" id="room-code" placeholder="🔑 입장 코드 입력 (1000)">
+            <input type="text" id="student-name" placeholder="👤 이름 입력 (예: 홍길동)">
+            <button class="btn-main" onclick="startQuiz()">탐방 시작하기 🚀</button>
+        </div>
+    </div>
+
+    <!-- 2. 퀴즈 화면 -->
+    <div id="quiz-screen" class="hidden">
+        <div class="header" style="margin-bottom: 10px;">
+            <div class="step-badge">
+                <span>🏛️ 나주역 기념관</span> | <span>🇰🇷 Step <span id="step-num">1</span>/20</span>
+            </div>
+            <h1 id="user-info-display" style="font-size: 1.3rem;"></h1>
+        </div>
+
+        <div class="progress-bar"><div class="progress" id="progress"></div></div>
+        
+        <div class="question-card-wrapper">
+            <div class="question-box" id="question-box"></div>
+        </div>
+
+        <form onsubmit="handleSubmit(event)">
+            <div style="display:flex; gap:10px;">
+                <input type="text" id="answer-input" placeholder="정답을 입력하세요" autocomplete="off" style="flex:1;">
+                <button type="submit" class="btn-main" style="width: 90px; padding: 0;">제출</button>
+            </div>
+        </form>
+        <p id="msg" style="text-align:center; margin-top:15px; font-weight:bold; font-size: 1.05rem;"></p>
+    </div>
+
+    <!-- 3. 미션 완료 화면 -->
+    <div id="result-screen" class="hidden" style="text-align:center; padding:10px 0;">
+        <img src="https://cdn-icons-png.flaticon.com/512/197/197582.png" style="width: 90px; height: auto; margin-bottom: 15px;" alt="태극기">
+        <h2 style="color:var(--secondary); font-size: 1.7rem; margin-bottom: 10px;">🎉 탐방 미션 성공!</h2>
+        <p style="color:var(--primary); font-size:1.15rem; font-weight:bold; line-height:1.6; margin-bottom:20px;">
+            축하합니다!<br>당신은 당당한 <b>나주학생독립운동 전문가</b>입니다!
+        </p>
+        <button class="btn-send" id="send-btn" onclick="sendToTeacher()">📤 선생님에게 결과 제출하기</button>
+        <p id="send-msg" style="margin-top:15px; font-weight:bold; color:#27ae60;"></p>
+    </div>
+</div>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyD8YLm0dP67l8m99StfCxriueyJEhlyBpk",
+        authDomain: "najurisua.firebaseapp.com",
+        databaseURL: "https://najurisua-default-rtdb.firebaseio.com",
+        projectId: "najurisua",
+        storageBucket: "najurisua.firebasestorage.app",
+        messagingSenderId: "19829249054",
+        appId: "1:19829249054:web:9bcb211068a9c9bb81ca0f",
+        measurementId: "G-2WMMS89R6X"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // q: 문제, a: 정답 배열 (유사 정답 인정)
+    const quizData = [
+        { q: "기념관은 옛 나주역 옆에 당시의 역사를 깨우기 위해 [ <span class='blank'>?</span> ] 7월 25일에 개관했다.", a: ["2008년", "2008"] },
+        { q: "1895년 전국 항일의병의 단초가 된 사건은 [ <span class='blank'>?</span> ]이다.", a: ["단발령"] },
+        { q: "1905년 일제가 강제로 체결한 조약은 [ <span class='blank'>?</span> ]이다.", a: ["을사조약", "을사늑약"] },
+        { q: "1910년대 일제의 헌병 경찰 통치 시기를 [ <span class='blank'>?</span> ] 시기라고 한다.", a: ["무단통치", "무단"] },
+        { q: "1920년대 일제의 기만적인 통치 시기를 [ <span class='blank'>?</span> ] 시기라고 한다.", a: ["문화정치", "문화"] },
+        { q: "신간회 나주지회 창립 당시 부회장으로 선출된 인물은 [ <span class='blank'>?</span> ]이다.", a: ["김창용"] },
+        { q: "1929년 11.3 운동의 발단이 된 장소는 [ <span class='blank'>?</span> ] 안이었다.", a: ["통학열차", "열차", "기차"] },
+        { q: "일제가 나주평야의 쌀을 수탈하기 위해 세운 기관은 [ <span class='blank'>?</span> ]이다.", a: ["동양척식주식회사", "동척"] },
+        { q: "나주청년회 회장으로 활동하며 소년운동을 이끈 인물은 [ <span class='blank'>?</span> ]이다.", a: ["박준삼"] },
+        { q: "나주 읍내 상권을 되찾기 위해 자본금을 모아 창설한 곳은 [ <span class='blank'>?</span> ]이다.", a: ["나주협동상회"] },
+        { q: "나주역 충돌 사건을 당시 현장에서 직접 보고 증언한 광주여고보생은 [ <span class='blank'>?</span> ]이다.", a: ["이광춘"] },
+        { q: "통근열차에서 일본인 학생에게 희롱당한 여학생 중 한 명은 [ <span class='blank'>?</span> ]양이다.", a: ["박기옥"] },
+        { q: "여학생들을 희롱하는 일본인을 꾸짖고 격분한 한국인 남학생은 [ <span class='blank'>?</span> ]이다.", a: ["박준채"] },
+        { q: "1918년(무오년) 음력 11월에 발표된 우리나라 최초의 독립선언서는 [ <span class='blank'>?</span> ]이다.", a: ["대한독립선언서", "무오독립선언서"] },
+        { q: "1930년 1월 시험 거부를 통해 일제에 항거한 사건을 [ <span class='blank'>?</span> ]이라고 한다.", a: ["백지동맹"] },
+        { q: "백지동맹 주동자로 퇴학당한 당시 광주고보 학생은 [ <span class='blank'>?</span> ]이다.", a: ["이기홍"] },
+        { q: "나주실업보습학교 학생 시위를 주도하다 체포된 청년부장은 [ <span class='blank'>?</span> ]이다.", a: ["박동희"] },
+        { q: "나주 학생들의 정신은 해방 이후 1960년 [ <span class='blank'>?</span> ] 의거로 계승되었다.", a: ["4.19", "4.19의거", "419"] },
+        { q: "나주 학생들의 정신은 1980년 [ <span class='blank'>?</span> ] 민주화운동으로 계승되었다.", a: ["5.18", "5.18민주화운동", "518"] },
+        { q: "나주 학생들의 정신은 1987년 [ <span class='blank'>?</span> ] 항쟁으로 이어졌다.", a: ["6월", "6월항쟁", "6월민주항쟁"] }
+    ];
+
+    let studentName = "", currentStep = 0;
+
+    function startQuiz() {
+        const roomCode = document.getElementById('room-code').value.trim();
+        studentName = document.getElementById('student-name').value.trim();
+
+        if (roomCode !== "1000") {
+            alert("입장 코드가 올바르지 않습니다. (입장 코드: 1000)");
+            return;
+        }
+
+        if (!studentName) {
+            alert("이름을 입력해 주세요.");
+            return;
+        }
+
+        document.getElementById('login-screen').classList.add('hidden');
+        document.getElementById('quiz-screen').classList.remove('hidden');
+        document.getElementById('user-info-display').innerText = `대원: ${studentName}`;
+
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        document.getElementById('step-num').innerText = currentStep + 1;
+        document.getElementById('question-box').innerHTML = quizData[currentStep].q;
+        document.getElementById('progress').style.width = `${((currentStep + 1) / quizData.length) * 100}%`;
+        document.getElementById('answer-input').value = "";
+        document.getElementById('msg').innerText = "";
+    }
+
+    function handleSubmit(e) {
+        e.preventDefault();
+        const userInput = document.getElementById('answer-input').value.trim().replace(/\s/g, "");
+        const validAnswers = quizData[currentStep].a.map(ans => ans.replace(/\s/g, ""));
+
+        // 유효 정답 배열 중 하나라도 일치하는지 확인
+        if (validAnswers.includes(userInput)) {
+            document.getElementById('msg').innerHTML = "<span style='color:#27ae60;'>⭕ 정답입니다! 다음 문제로 이동합니다.</span>";
+            currentStep++;
+
+            setTimeout(() => {
+                if (currentStep < quizData.length) {
+                    loadQuestion();
+                } else {
+                    document.getElementById('quiz-screen').classList.add('hidden');
+                    document.getElementById('result-screen').classList.remove('hidden');
+                }
+            }, 600);
+        } else {
+            document.getElementById('msg').innerHTML = "<span style='color:#e74c3c;'>❌ 다시 한 번 생각해보세요!</span>";
+        }
+    }
+
+    function sendToTeacher() {
+        const now = new Date();
+        const timeString = `${now.getHours()}시 ${now.getMinutes()}분 ${now.getSeconds()}초`;
+
+        db.ref(`submissions/${studentName}`).set({
+            name: studentName,
+            status: "완료 (학생운동 전문가)",
+            submittedAt: timeString
+        }).then(() => {
+            document.getElementById('send-msg').innerText = "✅ 성공적으로 선생님께 제출되었습니다!";
+            document.getElementById('send-btn').disabled = true;
+            document.getElementById('send-btn').style.background = "#95a5a6";
+            document.getElementById('send-btn').style.boxShadow = "none";
+        }).catch((error) => {
+            alert("전송 오류: " + error.message);
+        });
+    }
+</script>
+</body>
+</html>
